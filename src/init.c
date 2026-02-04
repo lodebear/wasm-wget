@@ -547,12 +547,17 @@ home_dir (void)
 
           home = buf;
 #elif !defined(WINDOWS)
+# if defined(__wasi__)
+          /* WASI has no user database; treat as no HOME. */
+          return NULL;
+# else
           /* If HOME is not defined, try getting it from the password
              file.  */
           struct passwd *pwd = getpwuid (getuid ());
           if (!pwd || !pwd->pw_dir)
             return NULL;
           home = pwd->pw_dir;
+# endif
 #else  /* !WINDOWS */
           /* Under Windows, if $HOME isn't defined, use the directory where
              `wget.exe' resides.  */

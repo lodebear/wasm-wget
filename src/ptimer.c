@@ -103,7 +103,7 @@ typedef struct timespec ptimer_system_time;
 
 /* clock_id to use for POSIX clocks.  This tries to use
    CLOCK_MONOTONIC where available, CLOCK_REALTIME otherwise.  */
-static int posix_clock_id;
+static clockid_t posix_clock_id;
 
 /* Resolution of the clock, initialized in posix_init. */
 static double posix_clock_resolution;
@@ -119,7 +119,7 @@ posix_init (void)
      real-time clock.  */
 #define NO_SYSCONF_CHECK -1
   static const struct {
-    int id;
+    clockid_t id;
     int sysconf_name;
   } clocks[] = {
 #if defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_MONOTONIC_CLOCK - 0 >= 0

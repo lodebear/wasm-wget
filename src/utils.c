@@ -52,14 +52,16 @@ as that of the covered work.  */
 #include <sys/stat.h>
 
 /* For TIOCGWINSZ and friends: */
-#ifndef WINDOWS
+#if !defined(WINDOWS) && !defined(__wasi__)
 # include <sys/ioctl.h>
 # include <termios.h>
 #endif
 
 /* Needed for Unix version of run_with_timeout. */
 #include <signal.h>
+#if !defined(__wasi__)
 #include <setjmp.h>
+#endif
 
 #include <regex.h>
 #ifdef HAVE_LIBPCRE2
@@ -78,6 +80,10 @@ as that of the covered work.  */
 
 #if defined HAVE_SIGSETJMP || defined HAVE_SIGBLOCK
 # define USE_SIGNAL_TIMEOUT
+#endif
+
+#if defined(__wasi__)
+# undef USE_SIGNAL_TIMEOUT
 #endif
 
 /* Some systems (Linux libc5, "NCR MP-RAS 3.0", and others) don't
@@ -463,6 +469,14 @@ fork_to_background (void)
   return false;
 }
 
+#elif defined(__wasi__)
+
+bool
+fork_to_background (void)
+{
+  return false;
+}
+
 #else /* def __VMS */
 
 #if !defined(WINDOWS) && !defined(MSDOS)
@@ -563,7 +577,7 @@ file_exists_p (const char *filename, file_stats_t *fstats)
   if (!filename)
 	  return false;
 
-#if defined(WINDOWS) || defined(__VMS)
+#if defined(WINDOWS) || defined(__VMS) || defined(__wasi__)
     int ret = stat (filename, &buf);
     if (ret >= 0)
     {

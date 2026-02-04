@@ -972,7 +972,7 @@ redirect_output (bool to_file, const char *signal_name)
 static void
 check_redirect_output (void)
 {
-#if !defined(WINDOWS) && !defined(__VMS)
+#if !defined(WINDOWS) && !defined(__VMS) && !defined(__wasi__)
   /* If it was redirected already to log file by SIGHUP, SIGUSR1 or -o parameter,
    * it was permanent.
    * If there was no SIGHUP or SIGUSR1 and shell is interactive

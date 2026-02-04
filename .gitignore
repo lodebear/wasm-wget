@@ -9,6 +9,8 @@
 /Makefile.in
 /aclocal.m4
 /autom4te.cache/
+build-wasi/
+.git-disabled/
 /config.cache
 /config.log
 /config.status
