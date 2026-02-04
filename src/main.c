@@ -1255,7 +1255,9 @@ print_version (void)
   const char *locale_title  = _("Locale: ");
   const char *compile_title = _("Compile: ");
   const char *link_title    = _("Link: ");
+#if !defined(__wasi__)
   char *env_wgetrc, *user_wgetrc;
+#endif
   int i;
 
   if (printf (_("GNU Wget %s built on %s.\n\n"), version_string, OS_TYPE) < 0)
@@ -1288,6 +1290,7 @@ print_version (void)
   if (printf ("%s\n", wgetrc_title) < 0)
     exit (WGET_EXIT_IO_FAIL);
 
+#if !defined(__wasi__)
   env_wgetrc = wgetrc_env_file_name ();
   if (env_wgetrc && *env_wgetrc)
     {
@@ -1306,6 +1309,7 @@ print_version (void)
   if (printf (_("    %s (system)\n"), SYSTEM_WGETRC) < 0)
     exit (WGET_EXIT_IO_FAIL);
 #endif
+#endif /* !__wasi__ */
 
 #ifdef ENABLE_NLS
   if (format_and_print_line (locale_title,
@@ -1367,6 +1371,11 @@ main (int argc, char **argv)
   bool use_userconfig = false;
   bool noconfig = false;
   bool append_to_log = false;
+
+#ifdef __wasi__
+  /* Avoid probing host config locations by default in WASI sandboxes. */
+  noconfig = true;
+#endif
 
   cleaned_up = 0; /* do cleanup later */
 
