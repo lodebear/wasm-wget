@@ -579,11 +579,21 @@ file_exists_p (const char *filename, file_stats_t *fstats)
 
 #if defined(WINDOWS) || defined(__VMS) || defined(__wasi__)
     int ret = stat (filename, &buf);
-    if (ret >= 0)
-    {
-      if (fstats != NULL)
-        fstats->access_err = errno;
-    }
+    if (fstats != NULL)
+      {
+        if (ret >= 0)
+          {
+            fstats->access_err = 0;
+# if defined(__wasi__)
+            /* __wasi__ consumers rely on st_dev/st_ino later in fopen_stat()
+               for TOCTTOU checks. Populate both so the comparison is meaningful. */
+            fstats->st_ino = buf.st_ino;
+            fstats->st_dev = buf.st_dev;
+# endif
+          }
+        else
+          fstats->access_err = (errno == 0 ? EACCES : errno);
+      }
     return ret >= 0;
 #else
   errno = 0;
